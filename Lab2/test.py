@@ -430,14 +430,14 @@ def clusterFeatures(img, featureMags, smoothingFlag=True):
     lambdas = lambdas[:-2]
     lambdas = np.tile(lambdas, 8)
 
-    sigma = 2.0
+    sigma = 0.2
     kernel_size = 3
     for i, fm in enumerate(featureMags):
         sigma_ = sigma#kernel_size*sigma*lambdas[i]
-        g_kernel = gauss2D(sigma, sigma, kernel_size)
-        features[:,:,i] = cv2.filter2D(fm, -1, g_kernel)
+        # g_kernel = gauss2D(sigma, sigma, kernel_size)
+        # features[:,:,i] = cv2.filter2D(fm, -1, g_kernel)
         # features[:,:,i] = scipy.signal.convolve2d(fm, g_kernel, boundary='symm', mode='same')
-        # features[:,:,i] = scipy.ndimage.gaussian_filter(fm, sigma=sigma_)
+        features[:,:,i] = scipy.ndimage.gaussian_filter(fm, sigma=sigma_)
   else:
     # Don't smooth but just insert magnitude images into the matrix called features.
     for i, fmag in enumerate(featureMags):
@@ -481,9 +481,9 @@ def clusterFeatures(img, featureMags, smoothingFlag=True):
   feature2DImage = np.reshape(transformed_feature,newshape=(numRows,numCols))
   # plt.figure()
   # plt.title(f'Pixel representation projected onto first PC')
-  plt.imshow(feature2DImage, cmap='gray')
-  plt.axis("off")
-  plt.show()
+  # plt.imshow(feature2DImage, cmap='gray')
+  # plt.axis("off")
+  # plt.show()
   '''
   Apply k-means algorithm to cluster pixels using the data matrix features.
   Hint-1: search about sklearn kmeans function https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html.
@@ -510,9 +510,9 @@ pixLabels = clusterFeatures(img, featureMags, True)
 
 numRows, numCols = img.shape
 pixLabels = np.reshape(pixLabels, newshape=(numRows, numCols))
-plt.imshow(pixLabels)
-plt.axis("off")
-plt.show()
+# plt.imshow(pixLabels)
+# plt.axis("off")
+# plt.show()
 # Use the pixLabels to visualize segmentation.
 Aseg1 = np.zeros_like(img)
 Aseg2 = np.zeros_like(img)
