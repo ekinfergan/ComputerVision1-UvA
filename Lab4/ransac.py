@@ -53,8 +53,8 @@ def visualization(src_img, ref_img, best_matrix):
 
     # ================
     # Custom Method
-    trs_f = affine_transform2(src_img, best_matrix,warp='inverse')
-    trs_b = affine_transform2(src_img, best_matrix, warp='inverse')
+    trs_f = affine_transform(src_img, best_matrix,warp='inverse')
+    trs_b = affine_transform(src_img, best_matrix, warp='inverse')
 
     # OpenCVs Method
     r, c, _ = src_img.shape
@@ -82,69 +82,6 @@ def visualization(src_img, ref_img, best_matrix):
     plt.tight_layout()
     plt.show()
     # ================
-def affine_transform2(img, mat, warp='forward'):
-    """
-    Arguments:
-      img: the first/second image (img1 or img2)
-      mat: transformation matrix
-      warp: forward or inverse warping
-    Returns:
-      transformed image
-    """
-
-    # =========================
-    # OUR CODE HERE IF NEEDED
-    # =========================
-    h, w, _ = img.shape
-    current_shift_x = 0
-    current_shift_y = 0
-
-    img_transformed = np.zeros((h, w, img.shape[2]), dtype=np.uint8)
-    if warp == 'forward':
-        for y in range(h):
-            for x in range(w):
-                input_coords = np.array([x, y, 1])
-                new_xy = np.floor(mat @ input_coords).astype(int)
-                new_x, new_y = new_xy[0], new_xy[1]
-                # Check if the new coordinates are within the image boundaries
-                if 0 <= new_x < w and 0 <= new_y < h:
-                    img_transformed[new_y, new_x, :] = img[y, x, :]
-    if warp == 'inverse':
-        mat_ = np.concatenate((mat, np.array([0, 0, 1]).reshape(1, -1)), axis=0)
-        mat_inv = np.linalg.inv(mat_)[0:2]
-        for y in range(h):
-            for x in range(w):
-                output_coords = np.array([x, y, 1])
-                new_xy = np.floor(mat_inv @ output_coords).astype(int)
-                new_x, new_y = new_xy[0], new_xy[1]
-
-                # Check if the input coordinates are within the image boundaries
-                if 0 <= new_x < w and 0 <= new_y < h:
-                    img_transformed[y, x, :] = img[new_y, new_x, :]
-
-                if new_xy[0] < 0 and abs(new_xy[0] - 1) > current_shift_x:
-                    old_shift_x = current_shift_x
-                    current_shift_x = abs(new_xy[0] - 1)
-                    new_shift_x = current_shift_x - old_shift_x
-                    img_transformed = cv2.warpAffine(img_transformed, np.float32([[1, 0, new_shift_x], [0, 1, 0]]),
-                                                       (img_transformed.shape[1], img_transformed.shape[0]),
-                                                 borderValue=0)
-                if new_xy[1] < 0 and abs(new_xy[1] - 1) > current_shift_y:
-                    old_shift_y = current_shift_y
-                    current_shift_y = abs(new_xy[1] - 1)
-                    new_shift_y = current_shift_y - old_shift_y
-                    img_transformed = cv2.warpAffine(img_transformed, np.float32([[1, 0, 0], [0, 1, new_shift_y]]),
-                                                       (img_transformed.shape[1], img_transformed.shape[0]),
-                                                        borderValue=0)
-
-                # img_transformed[new_xy[1] + current_shift_y, new_xy[0] + current_shift_x, :] = img[y, x, :]
-
-    plt.imshow(img_transformed)
-    plt.axis('off')
-    plt.show()
-    plt.close()
-    return img_transformed
-
 
 # Complete the function below. Use it in the `ransac` function and/or 'visualization' function.
 def affine_transform(img, mat, warp='forward'):
@@ -258,7 +195,7 @@ def ransac(kp1, kp2, matches, N):
 
 img1_path = "images/sp1.jpg"
 img2_path = "images/sp2.jpg"
-
+#
 # # Open images
 # img1 = cv2.imread(img1_path)
 # img2 = cv2.imread(img2_path)
